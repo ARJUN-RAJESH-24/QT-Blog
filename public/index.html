@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Quick Tech Security: CSP -->
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self' https://cdn.tailwindcss.com https://fonts.googleapis.com https://fonts.gstatic.com https://images.unsplash.com https://pagead2.googlesyndication.com https://www.gstatic.com; 
+                   script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://pagead2.googlesyndication.com https://www.gstatic.com; 
+                   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; 
+                   img-src 'self' https: data:; 
+                   connect-src 'self' https://pagead2.googlesyndication.com https://saurav.tech https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com;">
+    <title>Quick Tech | Fast. Accurate. Tech.</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Init Dark Mode
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark')
+        }
+
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        qt: {
+                            red: '#E11D48',
+                            dark: '#0F172A',
+                            surface: '#1E293B',
+                            accent: '#38BDF8'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+        }
+
+        .dark .glass-nav {
+            background: rgba(15, 23, 42, 0.9);
+        }
+    </style>
+</head>
+
+<body
+    class="bg-gray-100 dark:bg-gray-950 text-gray-900 dark:text-white min-h-screen flex flex-col transition-colors duration-300">
+
+    <!-- Navbar -->
+    <nav
+        class="glass-nav fixed w-full z-50 border-b border-gray-200 dark:border-gray-800 transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo -->
+                <div class="flex-shrink-0 cursor-pointer" onclick="window.location.href='index.html'">
+                    <span class="text-3xl font-extrabold tracking-tighter text-gray-900 dark:text-white">
+                        QT<span class="text-qt-red">.</span>
+                    </span>
+                </div>
+
+                <!-- Desktop Menu -->
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="index.html"
+                            class="bg-gray-200 dark:bg-gray-900 text-gray-900 dark:text-white px-3 py-2 rounded-md text-sm font-medium">Home</a>
+                        <a href="category.html?c=hardware"
+                            class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium">Hardware</a>
+                        <a href="category.html?c=software"
+                            class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium">Software</a>
+                        <a href="category.html?c=ai"
+                            class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium">AI</a>
+                        <a href="category.html?c=space"
+                            class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium">Space</a>
+                        <a href="category.html?c=gaming"
+                            class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium">Gaming</a>
+                    </div>
+                </div>
+
+                <!-- Right Side -->
+                <div class="flex items-center space-x-4">
+                    <!-- Theme Toggle -->
+                    <button onclick="toggleTheme()"
+                        class="p-2 rounded-lg bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-700 transition">
+                        <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                        </svg>
+                        <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor"
+                            viewBox="0 0 20 20">
+                            <path
+                                d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"
+                                fill-rule="evenodd" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+
+                    <!-- Auth Buttons -->
+                    <div id="auth-container" class="hidden md:flex items-center space-x-4">
+                        <a href="login.html"
+                            class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-sm font-medium">Log
+                            In</a>
+                        <a href="signup.html"
+                            class="bg-qt-red hover:bg-red-700 text-white px-4 py-2 rounded-full text-sm font-bold transition-colors">Sign
+                            Up</a>
+                    </div>
+
+                    <!-- User Profile (Hidden by default) -->
+                    <div id="user-profile" class="hidden md:flex items-center space-x-4">
+                        <span class="text-gray-600 dark:text-gray-300 text-sm" id="user-email">User</span>
+                        <div class="h-8 w-8 rounded-full bg-gradient-to-tr from-qt-red to-blue-500"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Top Ad Banner -->
+    <div class="pt-20 pb-4 max-w-7xl mx-auto w-full px-4">
+        <div
+            class="w-full h-24 bg-gray-800 rounded-lg flex items-center justify-center border border-gray-700 relative overflow-hidden group">
+            <span class="text-gray-500 font-mono text-xs z-10">ADVERTISEMENT SPACE</span>
+            <div class="absolute inset-0 bg-gray-800 opacity-50 group-hover:opacity-40 transition-opacity"></div>
+        </div>
+    </div>
+
+    <!-- Hero Section: Featured Article -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full">
+        <div id="hero-featured"
+            class="relative rounded-2xl overflow-hidden shadow-2xl h-[500px] group cursor-pointer transition-transform hover:scale-[1.005]">
+            <!-- JS will populate background -->
+            <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/60 to-transparent z-10"></div>
+            <img id="hero-img"
+                src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&q=80&w=2000"
+                class="absolute inset-0 w-full h-full object-cover transition-opacity duration-700" alt="Hero">
+
+            <!-- Controls -->
+            <button id="hero-prev"
+                class="absolute left-4 top-1/2 -translate-y-1/2 z-30 p-2 bg-black/50 text-white rounded-full hover:bg-qt-red transition hidden group-hover:flex">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+            </button>
+            <button id="hero-next"
+                class="absolute right-4 top-1/2 -translate-y-1/2 z-30 p-2 bg-black/50 text-white rounded-full hover:bg-qt-red transition hidden group-hover:flex">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </button>
+
+            <div class="absolute bottom-0 left-0 p-8 z-20 max-w-2xl">
+                <span id="hero-cat"
+                    class="bg-qt-red text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-4 inline-block">Breaking
+                    News</span>
+                <h1 id="hero-title"
+                    class="text-4xl md:text-5xl font-black leading-tight text-white mb-4 drop-shadow-lg transition-all duration-500">
+                    Latest Tech Update Loading...
+                </h1>
+                <p class="text-gray-200 text-lg mb-6 line-clamp-2">
+                    Stay tuned for the latest from the world of technology.
+                </p>
+                <button
+                    class="bg-white text-gray-900 px-6 py-3 rounded-full font-bold flex items-center gap-2 hover:bg-gray-100 transition-colors">
+                    Read Full Story
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        <!-- Left: Latest News Stream -->
+        <div class="lg:col-span-2">
+            <div class="flex items-center justify-between mb-8 border-l-4 border-qt-red pl-4">
+                <h2 class="text-2xl font-bold">Latest Transmissions</h2>
+                <div class="flex gap-2">
+                    <button
+                        class="px-3 py-1 text-xs font-bold bg-gray-800 rounded hover:bg-gray-700 transition">ALL</button>
+                    <button
+                        class="px-3 py-1 text-xs font-bold bg-gray-900 text-gray-400 rounded hover:bg-gray-700 transition">HARDWARE</button>
+                    <button
+                        class="px-3 py-1 text-xs font-bold bg-gray-900 text-gray-400 rounded hover:bg-gray-700 transition">AI</button>
+                </div>
+            </div>
+
+            <div id="latest-list" class="space-y-6">
+                <!-- Javascript will populate this list -->
+            </div>
+        </div>
+
+        <!-- Right: Sidebar (Ads & Trending) -->
+        <aside class="space-y-8">
+            <!-- Sidebar Ad -->
+            <div class="w-full h-64 bg-gray-800 rounded-lg flex items-center justify-center border border-gray-700">
+                <span class="text-gray-500 font-mono text-xs">SPONSORED</span>
+            </div>
+
+            <!-- Trending / Quick Hits -->
+            <div class="bg-gray-900 rounded-xl p-6 border border-gray-800">
+                <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-qt-accent animate-pulse"></span>
+                    Quick Hits
+                </h3>
+                <ul class="space-y-4">
+                    <li class="group cursor-pointer">
+                        <span class="text-qt-accent text-xs font-bold">NVIDIA</span>
+                        <p class="text-sm font-medium group-hover:text-qt-red transition-colors">RTX 5090 Leaked Specs -
+                            2.5x Performance?</p>
+                    </li>
+                    <li class="group cursor-pointer">
+                        <span class="text-qt-accent text-xs font-bold">GAMING</span>
+                        <p class="text-sm font-medium group-hover:text-qt-red transition-colors">GTA VI Delayed to 2026?
+                            Rockstart Responds.</p>
+                    </li>
+                    <li class="group cursor-pointer">
+                        <span class="text-qt-accent text-xs font-bold">SPACE</span>
+                        <p class="text-sm font-medium group-hover:text-qt-red transition-colors">Next Starship Launch
+                            Window Confirmed.</p>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 border-t border-gray-800 mt-12 py-12">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center">
+            <div class="mb-4 md:mb-0">
+                <span class="text-2xl font-black text-white">QT<span class="text-qt-red">.</span></span>
+                <p class="text-gray-500 text-sm mt-1">Decoding the signal from the noise.</p>
+            </div>
+            <div class="flex gap-6">
+                <a href="#" class="text-gray-400 hover:text-white">Privacy</a>
+                <a href="#" class="text-gray-400 hover:text-white">Terms</a>
+                <a href="#" class="text-gray-400 hover:text-white">Contact</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <!-- Firebase SDK (Compat for simple HTML use) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <script src="js/firebase-config.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>
