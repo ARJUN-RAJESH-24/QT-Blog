@@ -4,7 +4,7 @@
  */
 
 const NewsService = {
-    API_URL: 'https://saurav.tech/NewsAPI/top-headlines/category/technology/us.json', // Open Proxy for Development
+    API_URL: 'http://localhost:5000/api/news', // Local Flask Backend
     CACHE_KEY: 'qt_news_cache',
     CACHE_DURATION: 2 * 60 * 60 * 1000, // 2 Hours in ms
 
