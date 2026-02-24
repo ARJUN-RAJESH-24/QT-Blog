@@ -32,10 +32,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function loadHomePage() {
+    // Show loading skeleton immediately
+    showLoadingState();
+
     const articles = await getArticles();
+
     // 1. Setup Hero Carousel
     if (articles.length > 0) {
-        initHeroCarousel(articles.slice(0, 5)); // Use top 5 for carousel
+        initHeroCarousel(articles.slice(0, 5));
     }
 
     // 2. Setup Latest List (Top 10)
@@ -47,6 +51,68 @@ async function loadHomePage() {
             latestList.appendChild(card);
         });
     }
+
+    // 3. Populate Quick Hits sidebar
+    populateQuickHits(articles);
+}
+
+function showLoadingState() {
+    const latestList = document.getElementById('latest-list');
+    if (latestList) {
+        latestList.innerHTML = '';
+        for (let i = 0; i < 4; i++) {
+            const skeleton = document.createElement('div');
+            skeleton.className = 'flex flex-col md:flex-row gap-6 p-6 bg-gray-900 rounded-xl border border-gray-800 animate-pulse';
+            skeleton.innerHTML = `
+                <div class="w-full md:w-48 h-32 flex-shrink-0 rounded-lg bg-gray-800"></div>
+                <div class="flex flex-col justify-center flex-grow space-y-3">
+                    <div class="h-3 bg-gray-800 rounded w-1/4"></div>
+                    <div class="h-5 bg-gray-800 rounded w-3/4"></div>
+                    <div class="h-4 bg-gray-800 rounded w-full"></div>
+                </div>
+            `;
+            latestList.appendChild(skeleton);
+        }
+    }
+}
+
+function populateQuickHits(articles) {
+    const list = document.getElementById('quick-hits-list');
+    if (!list || articles.length === 0) return;
+
+    list.innerHTML = '';
+    // Pick 5 articles from different categories for variety
+    const seen = new Set();
+    const picks = [];
+    for (const article of articles) {
+        if (picks.length >= 5) break;
+        if (!seen.has(article.category)) {
+            seen.add(article.category);
+            picks.push(article);
+        }
+    }
+    // Fill remaining slots if less than 5 unique categories
+    for (const article of articles) {
+        if (picks.length >= 5) break;
+        if (!picks.includes(article)) picks.push(article);
+    }
+
+    picks.forEach(article => {
+        const li = document.createElement('li');
+        li.className = 'group cursor-pointer';
+        li.onclick = () => {
+            if (article.isExternal) {
+                window.open(article.url, '_blank');
+            } else {
+                window.location.href = `article.html?id=${article.id}`;
+            }
+        };
+        li.innerHTML = `
+            <span class="text-qt-accent text-xs font-bold uppercase">${article.category}</span>
+            <p class="text-sm font-medium group-hover:text-qt-red transition-colors">${article.title}</p>
+        `;
+        list.appendChild(li);
+    });
 }
 
 // Hero Carousel Logic (V6)
@@ -142,15 +208,18 @@ function createLatestCard(article) {
         }
     };
 
+    const fallbackImg = 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&q=80&w=600';
+
     div.innerHTML = `
         <div class="w-full md:w-48 h-32 flex-shrink-0 rounded-lg overflow-hidden bg-gray-800 relative">
-            <img src="${article.image}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+            <img src="${article.image || fallbackImg}" onerror="this.src='${fallbackImg}'" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy">
         </div>
         <div class="flex flex-col justify-center">
             <div class="flex items-center gap-3 mb-2">
                 <span class="text-xs font-bold uppercase text-qt-red bg-red-900/20 px-2 py-0.5 rounded">${article.category}</span>
                 <span class="text-xs text-gray-500">${article.date}</span>
                 <span class="text-xs text-gray-600">• ${article.author}</span>
+                ${article.isExternal ? '<span class="text-xs text-gray-700">↗ External</span>' : ''}
             </div>
             <h3 class="text-xl font-bold text-white mb-2 group-hover:text-qt-red transition-colors">${article.title}</h3>
             <p class="text-gray-400 text-sm line-clamp-2">${article.summary}</p>
@@ -162,21 +231,30 @@ function createLatestCard(article) {
 // Reuse card for grid view
 function createGridCard(article) {
     const div = document.createElement('div');
-    div.className = "bg-gray-900 rounded-xl overflow-hidden border border-gray-800 hover:border-qt-red/50 transition-all group flex flex-col";
+    div.className = "bg-gray-900 rounded-xl overflow-hidden border border-gray-800 hover:border-qt-red/50 transition-all group flex flex-col cursor-pointer";
+    div.onclick = () => {
+        if (article.isExternal) {
+            window.open(article.url, '_blank');
+        } else {
+            window.location.href = `article.html?id=${article.id}`;
+        }
+    };
+
+    const fallbackImg = 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&q=80&w=600';
 
     div.innerHTML = `
         <div class="h-48 overflow-hidden relative">
-            <img src="${article.image}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+            <img src="${article.image || fallbackImg}" onerror="this.src='${fallbackImg}'" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy">
             <span class="absolute top-2 right-2 bg-black/70 backdrop-blur text-white text-xs font-bold px-2 py-1 rounded">${article.category}</span>
         </div>
         <div class="p-6 flex flex-col flex-grow">
             <h3 class="text-lg font-bold text-white mb-2 leading-tight group-hover:text-qt-red transition-colors">
-                <a href="article.html?id=${article.id}">${article.title}</a>
+                ${article.title}
             </h3>
             <p class="text-gray-400 text-sm mb-4 flex-grow">${article.summary}</p>
             <div class="flex justify-between items-center pt-4 border-t border-gray-800">
                  <span class="text-xs text-gray-500">${article.date}</span>
-                 <a href="${article.isExternal ? article.url : 'article.html?id=' + article.id}" ${article.isExternal ? 'target="_blank"' : ''} class="text-xs font-bold text-white hover:text-qt-red">READ -></a>
+                 <span class="text-xs font-bold text-white group-hover:text-qt-red">${article.isExternal ? 'READ ↗' : 'READ →'}</span>
             </div>
         </div>
     `;
@@ -188,20 +266,50 @@ async function loadArticlePage() {
     const id = params.get('id');
 
     const article = await getArticleById(id);
-    if (!article) return;
+    if (!article) {
+        document.getElementById('article-body').innerHTML = '<p class="text-xl text-gray-400">Article not found.</p>';
+        return;
+    }
 
+    // External articles: redirect to source
+    if (article.isExternal && article.url) {
+        document.title = `${article.title} | Quick Tech`;
+        updateText('article-title', article.title);
+        updateText('article-category', article.category.toUpperCase());
+        updateText('article-date', article.date);
+        updateText('article-author', article.author);
+
+        const fallbackImg = 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&q=80&w=600';
+        const imgEl = document.getElementById('article-image');
+        if (imgEl) {
+            imgEl.src = article.image || fallbackImg;
+            imgEl.onerror = function () { this.src = fallbackImg; };
+        }
+
+        document.getElementById('article-body').innerHTML = `
+            <p class="text-xl text-gray-300 mb-8 border-l-4 border-qt-red pl-4 italic">${article.summary}</p>
+            <div class="bg-gray-900 border border-gray-700 rounded-xl p-8 text-center">
+                <p class="text-gray-400 mb-4">This article is sourced from <strong class="text-white">${article.author}</strong>.</p>
+                <a href="${article.url}" target="_blank" rel="noopener"
+                   class="inline-flex items-center gap-2 bg-qt-red hover:bg-red-700 text-white px-8 py-4 rounded-full font-bold text-lg transition-colors">
+                    Read Full Article ↗
+                </a>
+            </div>
+        `;
+        return;
+    }
+
+    // Internal article
     document.title = `${article.title} | Quick Tech`;
     updateText('article-title', article.title);
-    updateText('article-category', article.category);
+    updateText('article-category', article.category.toUpperCase());
     updateText('article-date', article.date);
     updateText('article-author', article.author);
 
     document.getElementById('article-image').src = article.image;
     document.getElementById('article-body').innerHTML = `
         <p class="text-xl text-gray-300 mb-8 border-l-4 border-qt-red pl-4 italic">${article.summary}</p>
-        <p>${article.content}<br><br>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-        <h3 class="text-2xl font-bold text-white mt-8 mb-4">Performance Analysis</h3>
-        <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+        <p>${article.content || ''}<br><br>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
     `;
 }
 

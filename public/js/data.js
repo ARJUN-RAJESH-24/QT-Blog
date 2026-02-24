@@ -1,7 +1,9 @@
 /*
- * Quick Tech - Mock Data V3 (Expanded)
+ * Quick Tech - Data Layer V3
+ * Integrates with NewsService for live data, falls back to mock articles.
  */
 
+// Fallback data - used when all RSS feeds are down and cache is empty
 const MOCK_ARTICLES = [
     {
         id: "1",
@@ -11,7 +13,8 @@ const MOCK_ARTICLES = [
         category: "hardware",
         date: "2 Hours Ago",
         image: "https://images.unsplash.com/photo-1591488320449-011701bb6704?auto=format&fit=crop&q=80&w=1000",
-        author: "Tech Steve"
+        author: "Tech Steve",
+        isExternal: false
     },
     {
         id: "2",
@@ -21,7 +24,8 @@ const MOCK_ARTICLES = [
         category: "space",
         date: "5 Hours Ago",
         image: "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&q=80&w=1000",
-        author: "NASA Press"
+        author: "NASA Press",
+        isExternal: false
     },
     {
         id: "3",
@@ -31,7 +35,8 @@ const MOCK_ARTICLES = [
         category: "software",
         date: "6 Hours Ago",
         image: "https://images.unsplash.com/photo-1662947036644-8025268c2cc6?auto=format&fit=crop&q=80&w=1000",
-        author: "MS Insider"
+        author: "MS Insider",
+        isExternal: false
     },
     {
         id: "4",
@@ -41,7 +46,8 @@ const MOCK_ARTICLES = [
         category: "ai",
         date: "Yesterday",
         image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=1000",
-        author: "AI Researcher"
+        author: "AI Researcher",
+        isExternal: false
     },
     {
         id: "5",
@@ -51,7 +57,8 @@ const MOCK_ARTICLES = [
         category: "software",
         date: "Yesterday",
         image: "https://images.unsplash.com/photo-1629654297299-c8506221ca97?auto=format&fit=crop&q=80&w=1000",
-        author: "Tux Times"
+        author: "Tux Times",
+        isExternal: false
     },
     {
         id: "6",
@@ -61,7 +68,8 @@ const MOCK_ARTICLES = [
         category: "space",
         date: "2 Days Ago",
         image: "https://images.unsplash.com/photo-1516849841032-87cbac4d88f7?auto=format&fit=crop&q=80&w=1000",
-        author: "Orbit Watch"
+        author: "Orbit Watch",
+        isExternal: false
     },
     {
         id: "7",
@@ -71,37 +79,67 @@ const MOCK_ARTICLES = [
         category: "software",
         date: "3 Days Ago",
         image: "https://images.unsplash.com/photo-1605236453692-07493b1f661e?auto=format&fit=crop&q=80&w=1000",
-        author: "Droid Life"
+        author: "Droid Life",
+        isExternal: false
     }
 ];
 
-// Helper to get articles
+// Category fallback images (when RSS articles have no image)
+const CATEGORY_FALLBACK_IMAGES = {
+    'ai': 'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=600',
+    'hardware': 'https://images.unsplash.com/photo-1591488320449-011701bb6704?auto=format&fit=crop&q=80&w=600',
+    'software': 'https://images.unsplash.com/photo-1629654297299-c8506221ca97?auto=format&fit=crop&q=80&w=600',
+    'space': 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&q=80&w=600',
+    'gaming': 'https://images.unsplash.com/photo-1552820728-8b83bb6b2b28?auto=format&fit=crop&q=80&w=600',
+    'tech news': 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&q=80&w=600'
+};
+
+// Store fetched articles in memory for quick access
+let _cachedArticles = null;
+
+// Main entry: get all articles (live → cache → mock)
 async function getArticles() {
-    const realNews = await NewsService.getLatestNews();
-    if (realNews && realNews.length > 0) {
-        return realNews;
+    // Return memory cache if available
+    if (_cachedArticles && _cachedArticles.length > 0) {
+        return _cachedArticles;
     }
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            resolve(MOCK_ARTICLES);
-        }, 300);
-    });
+
+    try {
+        const realNews = await NewsService.getLatestNews();
+        if (realNews && realNews.length > 0) {
+            // Fill in missing images with category fallbacks
+            realNews.forEach(article => {
+                if (!article.image) {
+                    article.image = CATEGORY_FALLBACK_IMAGES[article.category] || CATEGORY_FALLBACK_IMAGES['tech news'];
+                }
+            });
+            _cachedArticles = realNews;
+            return realNews;
+        }
+    } catch (e) {
+        console.warn('[Data] NewsService failed:', e);
+    }
+
+    // Fallback to mock
+    console.log('[Data] Using mock articles');
+    _cachedArticles = MOCK_ARTICLES;
+    return MOCK_ARTICLES;
 }
 
+// Get article by ID (works for both mock and live articles)
 async function getArticleById(id) {
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            const article = MOCK_ARTICLES.find(a => a.id === id);
-            resolve(article);
-        }, 100);
-    });
+    const articles = await getArticles();
+    return articles.find(a => a.id === id) || null;
 }
 
+// Get articles by category (works with live auto-categorized articles)
 async function getArticlesByCategory(category) {
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            const matches = MOCK_ARTICLES.filter(a => a.category === category);
-            resolve(matches);
-        }, 200);
+    const articles = await getArticles();
+    if (!category) return articles;
+
+    return articles.filter(a => {
+        const cat = a.category.toLowerCase();
+        const search = category.toLowerCase();
+        return cat === search || cat.includes(search);
     });
 }
