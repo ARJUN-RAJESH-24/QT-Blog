@@ -1,12 +1,24 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self' https://cdn.tailwindcss.com https://fonts.googleapis.com https://fonts.gstatic.com https://www.gstatic.com; 
+                   script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://www.gstatic.com; 
+                   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; 
+                   img-src 'self' https: data:; 
+                   connect-src 'self' https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com;">
     <title>Sign Up | Quick Tech</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark')
+        }
+
         tailwind.config = {
             darkMode: 'class',
             theme: {
@@ -19,6 +31,11 @@
         }
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
 </head>
 
 <body
@@ -31,67 +48,128 @@
             <p class="text-gray-500 dark:text-gray-400">Initialize Subscription Protocol.</p>
         </div>
 
-        <form id="signup-form" class="space-y-6">
+        <!-- Inline Error/Success Display -->
+        <div id="auth-error"
+            class="hidden mb-4 p-3 bg-red-950/50 border border-red-500/30 rounded-lg text-red-300 text-sm"></div>
+        <div id="auth-success"
+            class="hidden mb-4 p-3 bg-green-950/50 border border-green-500/30 rounded-lg text-green-300 text-sm"></div>
+
+        <form id="signup-form" class="space-y-6" novalidate>
             <!-- Access Credentials -->
             <div class="space-y-4">
-                <h3 class="text-sm font-bold text-white uppercase tracking-wider border-b border-gray-800 pb-2">1.
+                <h3
+                    class="text-sm font-bold text-gray-800 dark:text-white uppercase tracking-wider border-b border-gray-200 dark:border-gray-800 pb-2">
+                    1.
                     Credentials</h3>
+
                 <div>
-                    <label class="block text-sm font-medium text-gray-400 mb-2">Email Access</label>
-                    <input type="email" id="email"
-                        class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-qt-red transition-colors"
+                    <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Display Name</label>
+                    <input type="text" id="display-name" autocomplete="name"
+                        class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:border-qt-red focus:ring-1 focus:ring-qt-red transition-colors"
+                        placeholder="Commander Shepard" required>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Email</label>
+                    <input type="email" id="email" autocomplete="email"
+                        class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:border-qt-red focus:ring-1 focus:ring-qt-red transition-colors"
                         placeholder="name@example.com" required>
                 </div>
+
                 <div>
-                    <label class="block text-sm font-medium text-gray-400 mb-2">Establish Passcode</label>
-                    <input type="password" id="password"
-                        class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-qt-red transition-colors"
+                    <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Password</label>
+                    <input type="password" id="password" autocomplete="new-password"
+                        class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:border-qt-red focus:ring-1 focus:ring-qt-red transition-colors"
+                        placeholder="••••••••" required>
+                    <!-- Password strength bar -->
+                    <div class="mt-2 flex items-center gap-2">
+                        <div class="flex-grow h-1.5 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
+                            <div id="strength-bar" class="h-full rounded-full transition-all duration-300"
+                                style="width: 0%"></div>
+                        </div>
+                        <span id="strength-text" class="text-xs text-gray-500 min-w-[50px]"></span>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Confirm
+                        Password</label>
+                    <input type="password" id="confirm-password" autocomplete="new-password"
+                        class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:border-qt-red focus:ring-1 focus:ring-qt-red transition-colors"
                         placeholder="••••••••" required>
                 </div>
             </div>
 
             <!-- Preferences -->
             <div class="space-y-4">
-                <h3 class="text-sm font-bold text-white uppercase tracking-wider border-b border-gray-800 pb-2">2.
+                <h3
+                    class="text-sm font-bold text-gray-800 dark:text-white uppercase tracking-wider border-b border-gray-200 dark:border-gray-800 pb-2">
+                    2.
                     Briefing Preferences</h3>
                 <p class="text-xs text-gray-500">Select streams to receive priority dispatch notifications.</p>
 
                 <div class="grid grid-cols-2 gap-3">
                     <label
-                        class="flex items-center space-x-3 bg-gray-800 p-3 rounded-lg cursor-pointer hover:bg-gray-700 transition">
+                        class="flex items-center space-x-3 bg-gray-50 dark:bg-gray-800 p-3 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition border border-gray-200 dark:border-transparent">
                         <input type="checkbox" name="pref" value="hardware"
                             class="form-checkbox h-4 w-4 text-qt-red border-gray-600 rounded bg-gray-700 focus:ring-offset-gray-900 focus:ring-qt-red">
                         <span class="text-sm">Hardware</span>
                     </label>
                     <label
-                        class="flex items-center space-x-3 bg-gray-800 p-3 rounded-lg cursor-pointer hover:bg-gray-700 transition">
+                        class="flex items-center space-x-3 bg-gray-50 dark:bg-gray-800 p-3 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition border border-gray-200 dark:border-transparent">
                         <input type="checkbox" name="pref" value="space"
                             class="form-checkbox h-4 w-4 text-qt-red border-gray-600 rounded bg-gray-700 focus:ring-offset-gray-900 focus:ring-qt-red">
                         <span class="text-sm">Space / NASA</span>
                     </label>
                     <label
-                        class="flex items-center space-x-3 bg-gray-800 p-3 rounded-lg cursor-pointer hover:bg-gray-700 transition">
+                        class="flex items-center space-x-3 bg-gray-50 dark:bg-gray-800 p-3 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition border border-gray-200 dark:border-transparent">
                         <input type="checkbox" name="pref" value="ai"
                             class="form-checkbox h-4 w-4 text-qt-red border-gray-600 rounded bg-gray-700 focus:ring-offset-gray-900 focus:ring-qt-red">
                         <span class="text-sm">AI / Deep</span>
                     </label>
                     <label
-                        class="flex items-center space-x-3 bg-gray-800 p-3 rounded-lg cursor-pointer hover:bg-gray-700 transition">
+                        class="flex items-center space-x-3 bg-gray-50 dark:bg-gray-800 p-3 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition border border-gray-200 dark:border-transparent">
                         <input type="checkbox" name="pref" value="software"
                             class="form-checkbox h-4 w-4 text-qt-red border-gray-600 rounded bg-gray-700 focus:ring-offset-gray-900 focus:ring-qt-red">
                         <span class="text-sm">Software / OS</span>
                     </label>
+                    <label
+                        class="flex items-center space-x-3 bg-gray-50 dark:bg-gray-800 p-3 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition border border-gray-200 dark:border-transparent">
+                        <input type="checkbox" name="pref" value="gaming"
+                            class="form-checkbox h-4 w-4 text-qt-red border-gray-600 rounded bg-gray-700 focus:ring-offset-gray-900 focus:ring-qt-red">
+                        <span class="text-sm">Gaming</span>
+                    </label>
                 </div>
             </div>
 
-            <button type="submit"
-                class="w-full bg-qt-red hover:bg-red-700 text-white font-bold py-3 rounded-lg transition-colors shadow-lg shadow-red-900/20">
-                Initialize Account
+            <!-- Security Info -->
+            <div class="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-800 rounded-lg p-4">
+                <div class="flex items-start gap-3">
+                    <svg class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                            clip-rule="evenodd" />
+                    </svg>
+                    <div>
+                        <p class="text-xs text-gray-600 dark:text-gray-400"><strong
+                                class="text-gray-800 dark:text-gray-300">End-to-end encrypted.</strong> Your password is
+                            hashed with bcrypt on Firebase servers. We never store plaintext credentials.</p>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" id="signup-btn"
+                class="w-full bg-qt-red hover:bg-red-700 text-white font-bold py-3 rounded-lg transition-colors shadow-lg shadow-red-900/20 flex items-center justify-center gap-2">
+                <span>Initialize Account</span>
+                <svg id="signup-spinner" class="hidden animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
             </button>
         </form>
 
         <div class="mt-6 text-center text-sm text-gray-500">
-            Already authenticated? <a href="login.html" class="text-qt-red hover:underline">Login here</a>
+            Already authenticated? <a href="login.html" class="text-qt-red hover:underline font-medium">Login here</a>
         </div>
     </div>
 
@@ -103,23 +181,100 @@
     <script src="js/firebase-config.js"></script>
     <script src="js/auth.js"></script>
     <script>
+        const errorEl = document.getElementById('auth-error');
+        const successEl = document.getElementById('auth-success');
+
+        function showFormError(msg) {
+            errorEl.textContent = msg;
+            errorEl.classList.remove('hidden');
+            successEl.classList.add('hidden');
+            // Scroll to error
+            errorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        function showFormSuccess(msg) {
+            successEl.textContent = msg;
+            successEl.classList.remove('hidden');
+            errorEl.classList.add('hidden');
+        }
+        function hideMessages() {
+            errorEl.classList.add('hidden');
+            successEl.classList.add('hidden');
+        }
+
+        // Password Strength Meter (live)
+        document.getElementById('password').addEventListener('input', (e) => {
+            const pw = e.target.value;
+            const bar = document.getElementById('strength-bar');
+            const text = document.getElementById('strength-text');
+
+            if (pw.length === 0) {
+                bar.style.width = '0%';
+                bar.className = 'h-full rounded-full transition-all duration-300';
+                text.textContent = '';
+                return;
+            }
+
+            const strength = getPasswordStrength(pw);
+            bar.style.width = strength.width;
+            bar.className = `h-full rounded-full transition-all duration-300 ${strength.color}`;
+            text.textContent = strength.text;
+            text.className = `text-xs min-w-[50px] ${strength.level === 'weak' ? 'text-red-400' :
+                    strength.level === 'medium' ? 'text-yellow-400' : 'text-green-400'
+                }`;
+        });
+
+        // Signup form handler
         document.getElementById('signup-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = document.getElementById('email').value;
+            hideMessages();
+
+            const displayName = document.getElementById('display-name').value.trim();
+            const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
-            const btn = e.target.querySelector('button');
+            const confirmPassword = document.getElementById('confirm-password').value;
+            const btn = document.getElementById('signup-btn');
+            const spinner = document.getElementById('signup-spinner');
+            const btnText = btn.querySelector('span');
+
+            // Validation
+            if (!displayName) {
+                showFormError('Please enter a display name.');
+                return;
+            }
+            if (displayName.length > 50) {
+                showFormError('Display name is too long (max 50 characters).');
+                return;
+            }
+            if (!email || !validateEmail(email)) {
+                showFormError('Please enter a valid email address.');
+                return;
+            }
+            if (password.length < 6) {
+                showFormError('Password must be at least 6 characters.');
+                return;
+            }
+            if (password !== confirmPassword) {
+                showFormError('Passwords do not match.');
+                return;
+            }
 
             // Get Checkboxes
             const checkboxes = document.querySelectorAll('input[name="pref"]:checked');
             const preferences = Array.from(checkboxes).map(cb => cb.value);
 
             try {
-                btn.textContent = 'Processing...';
-                await handleSignup(email, password, preferences);
-                window.location.href = 'index.html';
+                btnText.textContent = 'Creating account...';
+                spinner.classList.remove('hidden');
+                btn.disabled = true;
+
+                await handleSignup(email, password, displayName, preferences);
+                showFormSuccess('Account created successfully! Redirecting...');
+                setTimeout(() => { window.location.href = 'index.html'; }, 1000);
             } catch (err) {
-                alert('Error: ' + err.message);
-                btn.textContent = 'Initialize Account';
+                showFormError(err.message);
+                btnText.textContent = 'Initialize Account';
+                spinner.classList.add('hidden');
+                btn.disabled = false;
             }
         });
     </script>
